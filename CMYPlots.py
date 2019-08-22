@@ -3,7 +3,6 @@ import numpy as np
 import re
 from matplotlib import pyplot as plt
 
-
 def plotHighDimGrids(df,
                     xAxis = 'hourOfDay',
                     yAxis = 'dayOfWeek',
@@ -13,7 +12,7 @@ def plotHighDimGrids(df,
                     channelBy = 'columns',
                     sample= 10000,
                     scale= .5,
-                   dataSetName = 'null',
+                    dataSetName = 'null',
                     minAtZero = False,
                     cmap = 'null',
                     analysesLabel='',
@@ -25,7 +24,6 @@ def plotHighDimGrids(df,
     if type(df) is str:
         df = getData(df)
         
-    channel = channelsByNum[int(df.channel.tolist()[0])]
     df = df[np.isfinite(df[xAxis])]
     df = df[np.isfinite(df[yAxis])]
     df.loc[:,xAxis] = df.loc[:,xAxis].astype(int)
@@ -34,18 +32,12 @@ def plotHighDimGrids(df,
     xAxisOut = cleanLabel(xAxis)
     yAxisOut = cleanLabel(yAxis)
 
-    
     if sample == 'null':
         sampled = df
         sampleArg = "Over %s Entries" % len(sampled)
     else:
         sampled = df.sample(n=min(sample,len(df)))
         sampleArg = "for Sample of Size %s" % sample
-        
-    if dataSetName == 'null':
-        nameArg = 'Agent %s Data' % channel
-    else:
-        nameArg = '%s' % dataSetName
         
     if type(analyses) is str:
         analyses = analyses.lower().replace('-','_').replace(' ','_')
@@ -216,37 +208,10 @@ def plotHighDimGrids(df,
             return key
         
     plt.tight_layout()
-    
-    if nAnalyses == 1:
-        titleArgs = (analyses[0][0],
-                    xAxisOut,
-                    yAxisOut,
-                    sampleArg)
-        plotTitle = '%s by %s and %s %s\n' % titleArgs
-        
-    else:
-        titleArgs = (nameArg,
-                     "/ ".join([i[0] for i in analyses])+' '+analysesLabel,
-                  xAxisOut,
-                  yAxisOut,
-                  sampleArg)
-        plotTitle = 'Comparison of %s Separated by %s\n and Plotted by %s and %s %s\n' % titleArgs
 
-        
-    #plt.title(plotTitle,fontsize=16)   
-    axes[0].set_title(plotTitle,fontsize=16)
     if xLabels != 'null':
         axes[0].set_xticklabels([tryLabel(xLabels,item.get_text()) for item in axes[0].get_xticklabels()])
     if yLabels != 'null':
         axes[0].set_yticklabels([tryLabel(yLabels,item.get_text()) for item in axes[0].get_yticklabels()])
     
-    
-    dirOut = '%sheatmaps/%s/' % (cfg['figuresDir'],channel)
-    if not os.path.exists(dirOut):
-        os.makedirs(dirOut)
-
-    plotName = '%s%s_by_%s' % (variable.title(),metric.title(),"-".join([i[0] for i in analyses])+'_'+analysesLabel)
-    figRef = '%s%s.png' % (dirOut,plotName)
-    print("Saving fig to %s" % figRef)
-    plt.savefig(figRef,bbox_inches='tight')
-    plt.show()
+    return fig, axes
